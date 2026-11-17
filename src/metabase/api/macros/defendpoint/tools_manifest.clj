@@ -190,10 +190,10 @@
     (when (and (every? seq branch-types)
                (apply distinct? (map value-type (apply concat branch-types)))
                (every? (fn [branch]
-                         (every? #(own-keyword? branch %) (remove (conj annotation-keys :type) (keys branch))))
+                         (every? #(own-keyword? branch %) (remove (conj mu.json-schema/annotation-keys :type) (keys branch))))
                        branches))
       (let [description (str/join " " (keep :description branches))]
-        (-> (apply merge (map #(apply dissoc % :type annotation-keys) branches))
+        (-> (apply merge (map #(apply dissoc % :type mu.json-schema/annotation-keys) branches))
             (assoc :type (into [] cat branch-types))
             (cond-> (not (str/blank? description)) (assoc :description description)))))))
 
@@ -201,7 +201,7 @@
   "The JSON Schema `schema` with an `anyOf` beside only annotations replaced by its [[union->type-array]], joining the
   descriptions, or `schema` itself when there is no such union."
   [{:keys [anyOf description] :as schema}]
-  (or (when (and anyOf (every? annotation-keys (keys (dissoc schema :anyOf))))
+  (or (when (and anyOf (every? mu.json-schema/annotation-keys (keys (dissoc schema :anyOf))))
         (when-let [union (union->type-array anyOf)]
           (let [descriptions (remove str/blank? [description (:description union)])]
             (cond-> (merge (dissoc schema :anyOf :description) (dissoc union :description))

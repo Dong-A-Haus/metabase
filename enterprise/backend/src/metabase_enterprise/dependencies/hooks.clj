@@ -2,6 +2,7 @@
   "Implements the hooks of `metabase.dependencies.hooks`: a write marks the statuses it makes stale in its own
   transaction, and triggers the background jobs once it commits."
   (:require
+   [metabase-enterprise.dependencies.calculation :as deps.calculation]
    [metabase-enterprise.dependencies.db :as dependencies.db]
    [metabase-enterprise.dependencies.dependency-types :as deps.dependency-types]
    [metabase-enterprise.dependencies.models.dependency :as models.dependency]
@@ -74,8 +75,7 @@
 (def ^:private dependency-columns
   "For each model, the columns whose update has the dependency job compute the entity's dependencies again."
   {:model/Action             #{:model_id :type}
-   :model/Card               #{:type :dataset_query :dimension_mappings :parameters
-                               :visualization_settings}
+   :model/Card               #{:type :dataset_query :dimension_mappings :parameters}
    :model/Dashboard          #{:parameters}
    :model/DataApp            #{:resource_collection_id}
    :model/Document           #{:content_type :document}
@@ -84,6 +84,17 @@
    :model/Sandbox            #{:card_id}
    :model/Segment            #{:definition :table_id}
    :model/Transform          #{:source :target}})
+
+(mu/defn- dependencies-changed? :- :boolean
+  "Whether the update of `row` of `model` changes its dependencies: a [[dependency-columns]] column, or a card's dynamic
+  goal sources, the only dependencies its viz settings hold."
+  [model :- :keyword
+   row   :- Row]
+  (or (changed? row (dependency-columns model))
+      (and (= :model/Card model)
+           (changed? row #{:visualization_settings})
+           (not= (deps.calculation/upstream-deps:dynamic-goals (:visualization_settings (t2/original row)))
+                 (deps.calculation/upstream-deps:dynamic-goals (:visualization_settings row))))))
 
 (def ^:private analysis-columns
   "For each model, the columns whose update has the analysis job analyze the entity itself again."
@@ -243,7 +254,7 @@
    row   :- Row]
   (let [entity-type (deps.dependency-types/model->dependency-type model)
         own         {entity-type #{(:id row)}}
-        dependency? (changed? row (dependency-columns model))
+        dependency? (dependencies-changed? model row)
         analysis?   (changed? row (analysis-columns model))
         output?     (output-changed? model row)
         part?       (changed? row (part-columns model))

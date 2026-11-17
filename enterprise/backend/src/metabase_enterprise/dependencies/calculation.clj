@@ -89,10 +89,12 @@
   [dimension-mappings :- [:maybe [:sequential ::lib-metric.schema/dimension-mapping]]]
   {:table (into #{} (keep :table-id) dimension-mappings)})
 
-(mu/defn- upstream-deps:dynamic-goals :- ::deps.schema/upstream-deps
-  "Entities whose value a dynamic goal in `viz-settings` reads, including goals nested in a visualizer dashcard."
-  [viz-settings :- [:maybe ::lib.schema.visualization/visualization-settings]]
-  (->> (dynamic-goals/goal-references viz-settings)
+(mu/defn upstream-deps:dynamic-goals :- ::deps.schema/upstream-deps
+  "Entities whose value a dynamic goal in stored `viz-settings` reads, including goals nested in a visualizer
+  dashcard."
+  [viz-settings :- :any]
+  (->> (dynamic-goals/goal-references
+        (lib/normalize ::lib.schema.visualization/visualization-settings viz-settings))
        (filter (fn [[entity-type id _column]]
                  (and (pos-int? id) (dynamic-goals/goal-entity-types entity-type))))
        (u/group-by (comp keyword first) second conj #{})))
@@ -129,9 +131,7 @@
         base-deps      (merge-with into
                                    (upstream-deps:query query)
                                    (upstream-deps:dimension-mappings dimension-mappings)
-                                   (upstream-deps:dynamic-goals
-                                    (lib/normalize ::lib.schema.visualization/visualization-settings
-                                                   (:visualization_settings card))))
+                                   (upstream-deps:dynamic-goals (:visualization_settings card)))
         param-card-ids (keep #(-> % :values_source_config :card_id) (:parameters card))]
     (reduce (fn [deps card-id]
               (update deps :card (fnil conj #{}) card-id))
@@ -195,9 +195,7 @@
                                        column-setting-card-ids])
         all-dashboard-ids (into vis-setting-dashboard-ids column-setting-dashboard-ids)
         goal-deps (reduce (fn [deps dashcard]
-                            (merge-with into deps (upstream-deps:dynamic-goals
-                                                   (lib/normalize ::lib.schema.visualization/visualization-settings
-                                                                  (:visualization_settings dashcard)))))
+                            (merge-with into deps (upstream-deps:dynamic-goals (:visualization_settings dashcard))))
                           {}
                           dashcards)]
     (merge-with into

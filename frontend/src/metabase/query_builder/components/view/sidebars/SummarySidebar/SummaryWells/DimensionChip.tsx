@@ -11,6 +11,7 @@ import type { SummaryFormulaInput } from "../SummaryFormulaBar";
 import type {
   SummaryBucketOption,
   SummaryDimensionItem,
+  SummaryDimensionWellId,
   SummaryQueryChangeOptions,
 } from "../types";
 import { changeDimensionBucket } from "../utils";
@@ -23,6 +24,7 @@ import { WellChip, type WellChipRename } from "./WellChip";
 type DimensionChipProps = {
   query: Lib.Query;
   stageIndex: number;
+  wellId: SummaryDimensionWellId;
   item: SummaryDimensionItem;
   generatedExpressions: SummaryGeneratedExpression[];
   isEditing: boolean;
@@ -35,6 +37,7 @@ type DimensionChipProps = {
 export function DimensionChip({
   query,
   stageIndex,
+  wellId,
   item,
   generatedExpressions,
   isEditing,
@@ -88,7 +91,7 @@ export function DimensionChip({
 
   return (
     <WellChip
-      drag={{ kind: "dimension", item }}
+      drag={{ kind: "dimension", item, wellId }}
       rename={rename}
       isSelected={isEditing}
       onRemove={onRemove}

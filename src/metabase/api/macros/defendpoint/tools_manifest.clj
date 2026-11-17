@@ -190,7 +190,8 @@
     (when (and (every? seq branch-types)
                (apply distinct? (map value-type (apply concat branch-types)))
                (every? (fn [branch]
-                         (every? #(own-keyword? branch %) (remove (conj mu.json-schema/annotation-keys :type) (keys branch))))
+                         (every? #(own-keyword? branch %)
+                                 (remove (conj mu.json-schema/annotation-keys :type) (keys branch))))
                        branches))
       (let [description (str/join " " (keep :description branches))]
         (-> (apply merge (map #(apply dissoc % :type mu.json-schema/annotation-keys) branches))

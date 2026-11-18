@@ -149,7 +149,7 @@
                (first results)))
         (is (= #{"unsynced"} @asked)))
       (testing "the item names MariaDB"
-        (is (=? [{:status :unknown, :message "MariaDB is not supported", :entity_id mariadb-id}]
+        (is (=? [{:status :skipped, :message "Not checked: MariaDB is not supported", :entity_id mariadb-id}]
                 (read-only-connections/items {:databases (take 1 results)}))))
       (testing "before the first sync the server is not known, so the database is asked"
         (is (= "no-privileges" (:result (second results))))))))
@@ -244,7 +244,7 @@
               [:pass "Metabase opens Sample Database read-only"]
               [:unknown "Timed out after 30 s"]
               [:unknown "Couldn't check Down. Check the server logs for the underlying error."]
-              [:unknown "no-such-engine is not supported"]
+              [:skipped "Not checked: no-such-engine is not supported"]
               [:unknown "Couldn't read the privileges of the connection user of Empty"]
               [:fail "SQLite has no read-only users. Move the data of Notes to another database engine."]]
              (map (juxt :status :message) items)))

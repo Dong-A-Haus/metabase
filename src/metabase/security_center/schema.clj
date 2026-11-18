@@ -115,13 +115,18 @@
 (mr/def ::health-check-status
   (into [:enum] health-check-statuses))
 
+(mr/def ::health-check-item-status
+  "Every status of a check, plus `:skipped`: the check did not look at the entity of the item, for example a database
+  on an engine that the check does not support."
+  (into [:enum :skipped] health-check-statuses))
+
 (mr/def ::health-check-entity-type
   [:enum :database :collection :group])
 
 (mr/def ::health-check-item
   "The `entity_` keys are named as in task runs. `entity_id` is `\"root\"` for the root collection."
   [:map {:closed true}
-   [:status      ::health-check-status]
+   [:status      ::health-check-item-status]
    [:message     {:optional true} :string]
    [:entity_type {:optional true} ::health-check-entity-type]
    [:entity_id   {:optional true} [:or ms/PositiveInt [:= "root"]]]

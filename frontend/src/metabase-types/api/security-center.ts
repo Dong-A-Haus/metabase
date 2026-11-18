@@ -74,8 +74,14 @@ export type HealthCheckId =
 export const HEALTH_CHECK_STATUSES = ["pass", "fail", "unknown"] as const;
 export type HealthCheckStatus = (typeof HEALTH_CHECK_STATUSES)[number];
 
+export const HEALTH_CHECK_ITEM_STATUSES = [
+  ...HEALTH_CHECK_STATUSES,
+  "skipped",
+] as const;
+export type HealthCheckItemStatus = (typeof HEALTH_CHECK_ITEM_STATUSES)[number];
+
 type HealthCheckItemBase = {
-  status: HealthCheckStatus;
+  status: HealthCheckItemStatus;
   message?: string;
 };
 

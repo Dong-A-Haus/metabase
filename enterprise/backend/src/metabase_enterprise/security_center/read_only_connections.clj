@@ -188,7 +188,7 @@
                                                     (tru "The connection user of {0} can insert, update or delete" db-name))]
                            "roles-skipped" [:unknown (tru "Couldn''t check the database roles that Metabase uses on {0}" db-name)]
                            "no-privileges" [:unknown (tru "Couldn''t read the privileges of the connection user of {0}" db-name)]
-                           "not-supported" [:unknown (tru "{0} is not supported" (engine-name engine))]
+                           "not-supported" [:skipped (tru "Not checked: {0} is not supported" (engine-name engine))]
                            "timed-out"     [:unknown (tru "Timed out after 30 s")]
                            [:unknown (tru "Couldn''t check {0}. Check the server logs for the underlying error." db-name)])]
     {:status      status

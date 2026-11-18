@@ -16,8 +16,8 @@ export const HealthCheckItemRow = ({
   item,
 }: HealthCheckItemRowProps) => {
   const { label, icon, iconColor } = getStatusInfo(item.status);
-  const action =
-    item.status === "pass" ? null : getHealthCheckItemAction(checkId, item);
+  const hasProblem = item.status === "fail" || item.status === "unknown";
+  const action = hasProblem ? getHealthCheckItemAction(checkId, item) : null;
 
   return (
     <Group

@@ -57,7 +57,13 @@
   (testing "else any item unknown → unknown"
     (is (= :unknown (health-checks/status-of [{:status :pass} {:status :unknown}]))))
   (testing "else pass"
-    (is (= :pass (health-checks/status-of [{:status :pass} {:status :pass}])))))
+    (is (= :pass (health-checks/status-of [{:status :pass} {:status :pass}]))))
+  (testing "skipped items do not change the status"
+    (is (= :pass (health-checks/status-of [{:status :pass} {:status :skipped}])))
+    (is (= :fail (health-checks/status-of [{:status :skipped} {:status :fail}])))
+    (is (= :unknown (health-checks/status-of [{:status :skipped} {:status :unknown}]))))
+  (testing "every item skipped → unknown"
+    (is (= :unknown (health-checks/status-of [{:status :skipped} {:status :skipped}])))))
 
 (deftest ^:parallel applicable-test
   (is (true? (health-checks/applicable? (fake-check :applicable? (constantly true)))))

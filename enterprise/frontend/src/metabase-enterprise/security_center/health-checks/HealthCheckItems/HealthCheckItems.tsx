@@ -49,11 +49,12 @@ export const HealthCheckItems = ({ check }: HealthCheckItemsProps) => {
     ...getItemsByStatus(check.items, "fail"),
     ...getItemsByStatus(check.items, "unknown"),
   ];
+  const skippedItems = getItemsByStatus(check.items, "skipped");
   const passedItems = getItemsByStatus(check.items, "pass");
   const isPassedCollapsed = problemItems.length > 0 && passedItems.length > 0;
   const visibleItems = isPassedCollapsed
-    ? problemItems
-    : [...problemItems, ...passedItems];
+    ? [...problemItems, ...skippedItems]
+    : [...problemItems, ...passedItems, ...skippedItems];
 
   return (
     <Card withBorder p={0} shadow="none" className={S.itemList}>

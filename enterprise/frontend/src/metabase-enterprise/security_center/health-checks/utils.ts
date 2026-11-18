@@ -8,6 +8,7 @@ import type {
   HealthCheck,
   HealthCheckId,
   HealthCheckItem,
+  HealthCheckItemStatus,
   HealthCheckStatus,
   IconName,
 } from "metabase-types/api";
@@ -20,7 +21,7 @@ type StatusStyle = {
   badgeColor: BadgeColor;
 };
 
-const STATUS_STYLES: Record<HealthCheckStatus, StatusStyle> = {
+const STATUS_STYLES: Record<HealthCheckItemStatus, StatusStyle> = {
   fail: {
     icon: "warning_triangle_filled",
     iconColor: "feedback-negative",
@@ -32,16 +33,22 @@ const STATUS_STYLES: Record<HealthCheckStatus, StatusStyle> = {
     iconColor: "feedback-positive",
     badgeColor: "positive",
   },
+  skipped: {
+    icon: "info_outline",
+    iconColor: "text-secondary",
+    badgeColor: "neutral",
+  },
 };
 
-const getStatusLabel = (status: HealthCheckStatus) =>
+const getStatusLabel = (status: HealthCheckItemStatus) =>
   match(status)
     .with("fail", () => t`Failing`)
     .with("unknown", () => t`Couldn't check`)
     .with("pass", () => t`Passed`)
+    .with("skipped", () => t`Not checked`)
     .exhaustive();
 
-export const getStatusInfo = (status: HealthCheckStatus) => ({
+export const getStatusInfo = (status: HealthCheckItemStatus) => ({
   ...STATUS_STYLES[status],
   label: getStatusLabel(status),
 });
@@ -61,7 +68,7 @@ export const getOldestCheckedAt = (checks: HealthCheck[]) =>
 
 export const getItemsByStatus = (
   items: HealthCheckItem[],
-  status: HealthCheckStatus,
+  status: HealthCheckItemStatus,
 ) => items.filter((item) => item.status === status);
 
 type HealthCheckItemAction = {

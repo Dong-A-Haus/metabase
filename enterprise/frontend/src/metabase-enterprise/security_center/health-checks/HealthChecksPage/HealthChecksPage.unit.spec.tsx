@@ -307,6 +307,61 @@ describe("HealthChecksPage", () => {
     expect(getItemTexts()).toEqual(["Broken", "Unsure", "Fine"]);
   });
 
+  it("shows skipped items after the problems and keeps passed items collapsed", async () => {
+    await setup({
+      checks: [
+        {
+          ...FAILING_CHECK,
+          items: [
+            createMockHealthCheckItem({ status: "pass", message: "Fine" }),
+            createMockHealthCheckItem({
+              status: "skipped",
+              message: "Skipped",
+            }),
+            createMockHealthCheckItem({ status: "fail", message: "Broken" }),
+          ],
+        },
+      ],
+    });
+
+    await showDetails(FAILING_CHECK.id);
+
+    const items = screen.getAllByTestId("health-check-item");
+    expect(items.map((item) => item.textContent)).toEqual([
+      "Broken",
+      "Skipped",
+    ]);
+    expect(within(items[1]).getByLabelText("Not checked")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Passed \(1\)/ }),
+    ).toBeInTheDocument();
+  });
+
+  it("shows skipped items of a passing check after the passed items", async () => {
+    await setup({
+      checks: [
+        {
+          ...PASSING_CHECK,
+          items: [
+            createMockHealthCheckItem({
+              status: "skipped",
+              message: "Skipped",
+            }),
+            createMockHealthCheckItem({ status: "pass", message: "Fine" }),
+          ],
+        },
+      ],
+    });
+    await openGroup(/Passed/);
+    await showDetails(PASSING_CHECK.id);
+
+    expect(
+      screen
+        .getAllByTestId("health-check-item")
+        .map((item) => item.textContent),
+    ).toEqual(["Fine", "Skipped"]);
+  });
+
   it("shows the items of a passing check without collapsing them", async () => {
     await setup({ checks: [PASSING_CHECK] });
     await openGroup(/Passed/);
@@ -406,6 +461,17 @@ describe("HealthChecksPage", () => {
         entity_type: "group",
         entity_id: 1,
         entity_name: "All Users",
+      },
+    },
+    {
+      name: "a database that the check skipped",
+      checkId: "read-only-connections",
+      item: {
+        status: "skipped",
+        message: "Not checked: BigQuery is not supported",
+        entity_type: "database",
+        entity_id: 1,
+        entity_name: "Events",
       },
     },
     {

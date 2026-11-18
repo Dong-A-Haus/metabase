@@ -373,12 +373,14 @@
   (sort (keys checks)))
 
 (mu/defn status-of :- ::security-center.schema/health-check-status
-  "The status of a check from its items: any item fails → fail; else any item unknown → unknown; else pass."
+  "The status of a check from its items, ignoring skipped items: any item fails → fail; else any item unknown, or
+  every item skipped → unknown; else pass."
   [items :- [:sequential ::security-center.schema/health-check-item]]
-  (let [statuses (into #{} (map :status) items)]
+  (let [statuses (disj (into #{} (map :status) items) :skipped)]
     (cond
       (statuses :fail)    :fail
       (statuses :unknown) :unknown
+      (empty? statuses)   :unknown
       :else               :pass)))
 
 (mu/defn applicable? :- :boolean

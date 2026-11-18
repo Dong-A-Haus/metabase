@@ -1847,6 +1847,13 @@ describe("DashboardApp > visualizer", () => {
   });
 
   describe("analytics events", () => {
+    // `metabase/analytics` is mocked for every test in the test setup
+    const trackSimpleEvent = jest.mocked(Analytics.trackSimpleEvent);
+
+    beforeEach(() => {
+      trackSimpleEvent.mockClear();
+    });
+
     const visualizerEvent = (
       event: string,
       eventDetail?: string,
@@ -1857,7 +1864,6 @@ describe("DashboardApp > visualizer", () => {
     });
 
     it("should track each visualizer action once, in order", async () => {
-      const trackSimpleEvent = jest.spyOn(Analytics, "trackSimpleEvent");
       const getVisualizerEvents = () =>
         trackSimpleEvent.mock.calls
           .map(([event]) => event)

@@ -67,6 +67,7 @@ export type DataTestTypeDefinition<T extends DataTest> = {
   }) => DataTestRunMutation;
   useReadOnly: (
     subjectId: DataTestSubjectId | SkipToken,
+    tests: readonly T[],
   ) => DataTestReadOnlyResult;
   getSubjectId: (test: T) => DataTestSubjectId;
   getTestUrl: (test: T) => string;

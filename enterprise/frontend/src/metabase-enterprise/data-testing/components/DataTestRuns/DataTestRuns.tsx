@@ -55,6 +55,7 @@ export function DataTestRuns<K extends DataTestType>({
     error: readOnlyError,
   } = definition.useReadOnly(
     test != null ? definition.getSubjectId(test) : skipToken,
+    test != null ? [test] : [],
   );
   const [, { isLoading: isRunning }] = definition.useRunTestMutation({
     fixedCacheKey: getRunDataTestCacheKey(testType, testId),

@@ -1,4 +1,4 @@
-(ns ^:mb/driver-tests metabase.query-processor.util.relative-datetime-test
+(ns metabase.query-processor.util.relative-datetime-test
   {:clj-kondo/config '{:linters {:deprecated-var {:exclude {metabase.test.data/mbql-query {:namespaces [metabase.query-processor.util.relative-datetime-test]}
                                                             metabase.test.data/run-mbql-query {:namespaces [metabase.query-processor.util.relative-datetime-test]}}}}}}
   (:require
@@ -44,7 +44,7 @@
     [_driver _feature _database]
     true))
 
-(deftest server-side-relative-datetime-test
+(deftest ^:mb/driver-tests server-side-relative-datetime-test
   (mt/test-drivers (mt/normal-drivers-with-feature ::server-side-relative-datetime)
     (testing "Values of getdate() and server side generated timestamp are equal"
       (mt/with-metadata-provider (mt/id)
@@ -59,7 +59,7 @@
             (testing (str tz-setter " " timezone)
               (tz-setter timezone test-thunk))))))))
 
-(deftest server-side-relative-datetime-multiple-tz-settings-test
+(deftest ^:mb/driver-tests server-side-relative-datetime-multiple-tz-settings-test
   (mt/test-drivers (mt/normal-drivers-with-feature ::server-side-relative-datetime)
     (mt/with-metadata-provider (mt/id)
       (testing "Value of server side generated timestamp matches the one from getdate() with multiple timezone settings"
@@ -70,7 +70,7 @@
                 (let [test-thunk (getdate-vs-ss-ts-test-thunk-generator! :week -1)]
                   (test-thunk))))))))))
 
-(deftest server-side-relative-datetime-various-units-test
+(deftest ^:mb/driver-tests server-side-relative-datetime-various-units-test
   (mt/test-drivers (mt/normal-drivers-with-feature ::server-side-relative-datetime)
     (mt/with-metadata-provider (mt/id)
       (testing "Value of server side generated timestamp matches the one from getdate() with multiple timezone settings"
@@ -79,7 +79,7 @@
                 :let [test-thunk (getdate-vs-ss-ts-test-thunk-generator! unit value)]]
           (test-thunk))))))
 
-(deftest server-side-relative-datetime-truncation-test
+(deftest ^:mb/driver-tests server-side-relative-datetime-truncation-test
   (mt/test-drivers (mt/normal-drivers-with-feature ::server-side-relative-datetime)
     (testing "Datetime _truncation_ works correctly over different timezones"
       ;; Sunday is the first week day. System is in UTC and has 2014 Aug 10 Sunday 12:30:01 AM. Report is required
@@ -105,7 +105,7 @@
                            :order-by [[:asc $last_login]]})
                         (mt/formatted-rows [int str str]))))))))))
 
-(deftest ^:parallel text-to-date-coercion-relative-time-filter-test
+(deftest ^:mb/driver-tests ^:parallel text-to-date-coercion-relative-time-filter-test
   (testing "text fields that have been casted to dates can be filtered by relative time"
     (mt/with-clock #t "2025-01-30T12:00:00-00:00[UTC]"
       (mt/test-drivers (mt/normal-drivers-with-feature ::server-side-relative-datetime)

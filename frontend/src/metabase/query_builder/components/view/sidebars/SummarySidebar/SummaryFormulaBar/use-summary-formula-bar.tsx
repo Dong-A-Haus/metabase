@@ -270,6 +270,7 @@ export function useSummaryFormulaBar({
     formulaInputs: {
       values: getFormulaInput("values"),
       columns: getFormulaInput("columns"),
+      rows: getFormulaInput("rows"),
     },
   };
 }

@@ -181,6 +181,7 @@ export function SummaryWells({
         >
           <SummaryWellInput
             wellId="rows"
+            formulaInput={formulaInputs?.rows}
             sections={dimensionSections}
             hasItems={rowItems.length > 0}
             onPick={(field) => onPick("rows", field)}
@@ -199,11 +200,15 @@ export function SummaryWells({
                 wellId="rows"
                 item={item}
                 generatedExpressions={generatedExpressions}
-                isEditing={false}
+                isEditing={isEditing("rows", item.key)}
+                formulaInput={formulaInputs?.rows}
                 onChange={onChange}
                 onRemove={() => handleRemove(item.clause)}
               />
             ))}
+            {draftFormula?.wellId === "rows" && (
+              <DraftFormulaChip {...draftFormula} />
+            )}
           </SummaryWellInput>
         </SummaryWell>
       ) : (

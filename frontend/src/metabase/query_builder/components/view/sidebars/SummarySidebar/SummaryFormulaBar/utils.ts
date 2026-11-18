@@ -11,7 +11,11 @@ import {
   getLegacyStage,
   makeSummaryFormula,
 } from "../../../../../utils/summary-formulas";
-import type { SummaryQueryChangeOptions, SummaryWellId } from "../types";
+import type {
+  SummaryDimensionWellId,
+  SummaryQueryChangeOptions,
+  SummaryWellId,
+} from "../types";
 import { getDimensionItems, getValueItems, isFormulaValue } from "../utils";
 
 import type { SummaryFormula, SummaryFormulaEdit } from "./types";
@@ -97,6 +101,7 @@ function getValueFormulas(
 function getDimensionFormulas(
   query: Lib.Query,
   stageIndex: number,
+  wellId: SummaryDimensionWellId,
 ): SummaryFormula[] {
   const expressionNames = Lib.expressions(query, stageIndex).map(
     (expression) => Lib.displayInfo(query, stageIndex, expression).displayName,
@@ -116,7 +121,7 @@ function getDimensionFormulas(
     }
     return [
       {
-        wellId: "columns",
+        wellId,
         key: item.key,
         signature,
         clause: item.expression,
@@ -135,7 +140,7 @@ function getWellFormulas(
 ): SummaryFormula[] {
   return wellId === "values"
     ? getValueFormulas(query, stageIndex)
-    : getDimensionFormulas(query, stageIndex);
+    : getDimensionFormulas(query, stageIndex, wellId);
 }
 
 export function findSummaryFormula(

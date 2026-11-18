@@ -1068,7 +1068,8 @@
        (not (:limit stage))))
 
 (defn- fix-order-bys
-  [stages join-source?]
+  "`inner-subquery?` = these stages are inside a join or CTE body."
+  [stages inner-subquery?]
   (let [n (count stages)]
     (vec
      (map-indexed
@@ -1080,8 +1081,8 @@
                       (update :joins (fn [joins]
                                        (mapv #(update % :stages fix-order-bys true) joins))))]
           (cond
-            ;; last stage of a join = the derived table directly under JOIN → dropping the ORDER BY is fine
-            (and last? join-source? (has-order-by-without-limit? stage))
+            ;; last stage inside a subquery → the outer context controls ordering, drop the ORDER BY
+            (and last? inner-subquery? (has-order-by-without-limit? stage))
             (dissoc stage :order-by)
 
             ;; any non-final subquery stage → make the ORDER BY legal by giving it a TOP
@@ -1092,9 +1093,14 @@
       stages))))
 
 (defmethod sql.qp/preprocess :sqlserver
-  [driver inner-query]
-  (let [parent-method (get-method sql.qp/preprocess :sql)]
-    (fix-order-bys (parent-method driver inner-query) false)))
+  [driver query]
+  (let [parent-method (get-method sql.qp/preprocess :sql)
+        preprocessed  (parent-method driver query)]
+    (-> preprocessed
+        (update :stages fix-order-bys false)
+        (cond-> (seq (:ctes preprocessed))
+          (update :ctes (fn [ctes]
+                          (mapv #(update-in % [:query :stages] fix-order-bys true) ctes)))))))
 
 ;; SQL server only supports setting holdability at the connection level, not the statement level, as per
 ;; https://docs.microsoft.com/en-us/sql/connect/jdbc/using-holdability?view=sql-server-ver15

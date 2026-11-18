@@ -544,7 +544,7 @@
          lib/->legacy-MBQL)
 
      ;; MBQL 4 inner MBQL query
-     ((some-fn :source-table :source-query) query)
+     ((some-fn :source-table :source-query :source-cte) query)
      (-> query
          ;; legacy inner-query entry point; the deprecated bridge is the only path to a Lib query here
          #_{:clj-kondo/ignore [:deprecated-var]}

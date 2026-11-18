@@ -48,6 +48,7 @@ type SetupOpts = {
   /** Custom columns the wells created, on `formulaStageIndex`. */
   formulaNames?: string[];
   formulaStageIndex?: number;
+  canPivot?: boolean;
   isPivotMode?: boolean;
   rowKeys?: string[];
 };
@@ -56,6 +57,7 @@ function setup({
   spec = SUMMARIZED_QUERY,
   formulaNames = [],
   formulaStageIndex = STAGE_INDEX,
+  canPivot = true,
   isPivotMode = false,
   rowKeys = [],
 }: SetupOpts = {}) {
@@ -77,6 +79,7 @@ function setup({
         .map((name) => makeSummaryFormula(query, formulaStageIndex, name))
         .filter(isNotNull)}
       draggedItem={null}
+      canPivot={canPivot}
       isPivotMode={isPivotMode}
       rowItems={rowItems}
       columnItems={columnItems}
@@ -451,6 +454,14 @@ describe("SummaryWells", () => {
 
       expect(onPivotToggle).toHaveBeenCalledTimes(1);
       expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it("has no pivot toggle when a pivot table is not possible", () => {
+      setup({ canPivot: false });
+
+      expect(
+        screen.queryByRole("button", { name: "Pivot into rows and columns" }),
+      ).not.toBeInTheDocument();
     });
 
     it("splits the groupings between Columns and Rows", () => {

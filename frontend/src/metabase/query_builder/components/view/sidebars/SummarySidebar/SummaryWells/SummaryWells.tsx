@@ -38,6 +38,7 @@ type SummaryWellsProps = {
   /** The chip whose formula is open in the formula bar. */
   editedFormula?: SummaryFormula | null;
   draggedItem: SummaryDragItem | null;
+  canPivot: boolean;
   isPivotMode: boolean;
   rowItems: SummaryDimensionItem[];
   columnItems: SummaryDimensionItem[];
@@ -55,6 +56,7 @@ export function SummaryWells({
   draftFormula,
   editedFormula,
   draggedItem,
+  canPivot,
   isPivotMode,
   rowItems,
   columnItems,
@@ -138,7 +140,9 @@ export function SummaryWells({
         title={isPivotMode ? t`Columns` : t`Group by`}
         dropState={dropStates?.columns ?? null}
         action={
-          <PivotToggle isPivotMode={isPivotMode} onToggle={onPivotToggle} />
+          canPivot && (
+            <PivotToggle isPivotMode={isPivotMode} onToggle={onPivotToggle} />
+          )
         }
       >
         <SummaryWellInput
@@ -173,7 +177,7 @@ export function SummaryWells({
           )}
         </SummaryWellInput>
       </SummaryWell>
-      {isPivotMode ? (
+      {isPivotMode && (
         <SummaryWell
           wellId="rows"
           title={t`Rows`}
@@ -211,7 +215,8 @@ export function SummaryWells({
             )}
           </SummaryWellInput>
         </SummaryWell>
-      ) : (
+      )}
+      {canPivot && !isPivotMode && (
         <PivotDropZone canDrop={dropStates?.rows === "accepts"} />
       )}
     </Box>

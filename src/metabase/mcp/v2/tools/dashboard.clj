@@ -191,6 +191,9 @@
                           (seq dropped)                (assoc :dropped_connections      dropped
                                                               :dropped_connection_count (count dropped))
                           (seq archived-subscriptions) (assoc :archived_subscriptions
-                                                              (mapv archived-subscription-row archived-subscriptions)))
-                        ;; A token that can't read the dashboard back still learns that filters were disconnected.
-                        [:dropped_connection_count]))))
+                                                              (mapv archived-subscription-row archived-subscriptions)
+                                                              :archived_subscription_count
+                                                              (count archived-subscriptions)))
+                        ;; A token that can't read the dashboard back still learns that filters were disconnected and
+                        ;; subscriptions archived.
+                        [:dropped_connection_count :archived_subscription_count]))))

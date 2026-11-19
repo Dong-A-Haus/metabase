@@ -4,6 +4,7 @@
   (:require
    [metabase.auth-identity.schema :as auth-identity.schema]
    [metabase.lib.schema.id :as lib.schema.id]
+   [metabase.util :as u]
    [metabase.util.malli :as mu]
    [metabase.util.malli.schema :as ms]
    [toucan2.core :as t2]))
@@ -48,3 +49,19 @@
    provider :- :string
    metadata :- [:maybe ::auth-identity.schema/auth-identity.metadata]]
   (t2/update! :model/AuthIdentity {:user_id user-id, :provider provider} {:metadata metadata}))
+
+(mu/defn user-in-group? :- :boolean
+  "Whether the User with `user-id` is a member of the PermissionsGroup with `group-id`."
+  [user-id  :- ::lib.schema.id/user
+   group-id :- ms/PositiveInt]
+  (t2/exists? :model/PermissionsGroupMembership :user_id user-id :group_id group-id))
+
+(mu/defn group-by-name
+  "The PermissionsGroup named `group-name`, or nil. Group names are unique ignoring case, and so is this match."
+  [group-name :- ms/NonBlankString]
+  (t2/select-one :model/PermissionsGroup {:where [:= [:lower :name] (u/lower-case-en group-name)]}))
+
+(mu/defn insert-group!
+  "Insert a PermissionsGroup named `group-name` and return it."
+  [group-name :- ms/NonBlankString]
+  (t2/insert-returning-instance! :model/PermissionsGroup {:name group-name}))

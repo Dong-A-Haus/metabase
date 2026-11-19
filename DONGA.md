@@ -77,10 +77,14 @@ Push to `donga/v0.65.2`, or run the workflow by hand: Actions → "Đông A buil
 2. builds the jar with `MB_EDITION=oss ./bin/build.sh '{:version "v0.65.2-donga.<run>"}'`;
 3. starts it and checks that `/auth/donga` refuses a request without the door;
 4. pushes `ghcr.io/dong-a-haus/metabase:v0.65.2-donga.<run>` for linux/amd64 and linux/arm64, labelled
-   `org.opencontainers.image.revision=<fork commit>`.
+   `org.opencontainers.image.revision=<fork commit>`. This proves the jar runs in upstream's image on both;
+5. publishes the jar, `metabase.jar.sha256` and `donga/Dockerfile` as the GitHub release `v0.65.2-donga.<run>` at the
+   fork commit.
 
-The run's summary shows the image's digest. `infra/metabase/compose.yaml` in donga-os pins the image by that digest,
-with a `DONGA_SOURCE` line naming the fork commit.
+The box does not pull from ghcr: the package is private, and a box should not hold a GitHub token. The repo is public,
+so donga-os `infra/metabase/setup.sh` downloads the release's jar and Dockerfile with no login, checks the jar against
+the sha256 that `infra/metabase/fork.env` pins, and builds `donga/metabase:v0.65.2-donga.<run>` on the box. The run's
+summary shows that sha256; to move donga-os to a new build, change the tag and the sha256 in `fork.env`.
 
 To build locally, with Java 25, the Clojure CLI, Node and bun, and uv:
 

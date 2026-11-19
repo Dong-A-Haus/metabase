@@ -5,8 +5,11 @@
 #         /auth/donga is there and refuses a request that did not come through the door.
 # image   puts that jar into upstream's own image for this version (donga/Dockerfile) for linux/amd64 and
 #         linux/arm64, and pushes ghcr.io/dong-a-haus/metabase:v0.65.2-donga.<run>, labelled with this commit.
+# release publishes the same jar, its sha256 and donga/Dockerfile as the GitHub release v0.65.2-donga.<run> at this
+#         commit. This repo is public, so Eric's Mini downloads them with no login, checks the sha256 that donga-os
+#         pins, and builds the image itself (the ghcr package is private, and a box should not hold a GitHub token).
 #
-# No secret is used or stored: the image is pushed with this run's GITHUB_TOKEN, and the door secret in the start
+# No secret is used or stored: the image and the release are published with this run's GITHUB_TOKEN, and the door secret in the start
 # check is a throwaway made by the job.
 name: Đông A build
 
@@ -133,3 +136,40 @@ jobs:
             echo
             echo "Fork commit: \`${{ github.sha }}\`"
           } >> "$GITHUB_STEP_SUMMARY"
+
+  release:
+    needs: [test, uberjar]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: metabase-jar
+          path: ${{ runner.temp }}/release
+      - name: Publish the jar, its sha256 and the Dockerfile as release v0.65.2-donga.<run>
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ env.UPSTREAM_VERSION }}-donga.${{ github.run_number }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/release"
+          cp "$GITHUB_WORKSPACE/donga/Dockerfile" Dockerfile
+          sha256sum metabase.jar > metabase.jar.sha256
+          sum=$(cut -d' ' -f1 metabase.jar.sha256)
+          {
+            echo "Metabase ${UPSTREAM_VERSION} with Đông A OS sign-in (DONGA.md), fork commit ${GITHUB_SHA}."
+            echo
+            echo "metabase.jar sha256: \`${sum}\`"
+            echo
+            echo "Build the image from these two files: \`docker build -t donga/metabase:${TAG} .\` in a folder holding"
+            echo "metabase.jar and Dockerfile. donga-os infra/metabase/setup.sh does this on the box after checking the sha256."
+          } > notes.md
+          gh release create "$TAG" metabase.jar metabase.jar.sha256 Dockerfile \
+            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "$TAG" --notes-file notes.md
+          echo "### Release" >> "$GITHUB_STEP_SUMMARY"
+          echo >> "$GITHUB_STEP_SUMMARY"
+          echo "\`$TAG\`, metabase.jar sha256 \`$sum\`" >> "$GITHUB_STEP_SUMMARY"

@@ -89,7 +89,7 @@
 (api.macros/defendpoint :get "/"
   "Sign in the person Đông A OS's door vouches for, then go to `redirect` (a path on this origin)."
   [_route-params
-   {:keys [redirect]} :- [:map [:redirect {:optional true} [:maybe :string]]]
+   {:keys [redirect]} :- [:map {:closed true} [:redirect {:optional true} [:maybe :string]]]
    _body
    request]
   (let [secret (door-secret)

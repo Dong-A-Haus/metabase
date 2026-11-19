@@ -83,8 +83,9 @@ Push to `donga/v0.65.2`, or run the workflow by hand: Actions → "Đông A buil
 
 The box does not pull from ghcr: the package is private, and a box should not hold a GitHub token. The repo is public,
 so donga-os `infra/metabase/setup.sh` downloads the release's jar and Dockerfile with no login, checks the jar against
-the sha256 that `infra/metabase/fork.env` pins, and builds `donga/metabase:v0.65.2-donga.<run>` on the box. The run's
-summary shows that sha256; to move donga-os to a new build, change the tag and the sha256 in `fork.env`.
+the sha256 that `infra/metabase/compose.yaml` pins (its `DONGA_JAR_SHA256` line), and builds
+`donga/metabase:v0.65.2-donga.<run>` on the box. The run's summary shows that sha256; to move donga-os to a new build,
+change the image tag and the `DONGA_JAR_SHA256` line in that compose.yaml.
 
 To build locally, with Java 25, the Clojure CLI, Node and bun, and uv:
 

@@ -97,7 +97,8 @@ docker build -f donga/Dockerfile -t donga/metabase:local /tmp/mbimg
 
 ## Roll back to upstream
 
-1. In donga-os `infra/metabase/compose.yaml`, set the Metabase image back to `metabase/metabase:v0.65.2`.
+1. In donga-os `infra/metabase/compose.yaml`, set the Metabase image back to `metabase/metabase:v0.65.2` and delete its
+   `pull_policy: never` line (that line is there so a missing `donga/metabase` build is never pulled from Docker Hub).
 2. Recreate the Metabase container.
 
 The application database is the same: this change adds no migration. Users the OS made keep their accounts and

@@ -100,7 +100,7 @@
           (is (= "Nguyễn Văn Tuấn" (:common_name me)))
           (is (true? (:is_superuser me))))
         (let [user (t2/select-one :model/User :%lower.email (:email who))]
-          (is (= :donga (:sso_source user)))
+          (is (= :donga (t2/select-one-fn :sso_source [:model/User :sso_source] :id (:id user))))
           (is (= {:provider "donga" :provider_id (:login who)}
                  (t2/select-one [:model/AuthIdentity :provider :provider_id] :user_id (:id user) :provider "donga")))
           (is (contains? (group-names (:id user)) (:name (perms/admin-group)))))))))
@@ -171,7 +171,7 @@
                                    "X-Donga-Door" secret))]
         (is (nil? (session-key resp)))
         (is (not (t2/exists? :model/AuthIdentity :user_id (:id admin) :provider "donga")))
-        (is (nil? (:sso_source (t2/select-one :model/User :id (:id admin)))))))
+        (is (nil? (t2/select-one-fn :sso_source [:model/User :sso_source] :id (:id admin))))))
     (testing "Metabase's own password login still works"
       (let [{:keys [username password]} (mt/user->credentials :rasta)]
         (binding [client/*url-prefix* ""]
